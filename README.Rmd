@@ -37,7 +37,7 @@ The data sets are:
 
 * `stalebrink`
 * `rvk`
-* `horizon2017`
+* `horizon10year2017`
 
 The examples below use these datasets.
 
@@ -52,20 +52,39 @@ devtools::install_github("donboyd5/portopt")
 
 ## Examples
 
+### Get basic information about a dataset
+This is a basic example which shows you how to solve a common problem:
+
+```{r basic}
+library("portopt")
+library("magrittr")
+library("tidyverse")
+
+stalebrink
+aa.wts <- c(.3, .2, .1, .15, .1, .05) # asset-allocation weights
+per(stalebrink$ersd$er, aa.wts) # portfolio expected return with these weights
+psd(stalebrink$cormat, stalebrink$ersd$sd, aa.wts) # portfolio standard deviation with these weights
+
+```
+
+
 ### Get the minimum variance portfolio for a given expected return
 This is a basic example which shows you how to solve a common problem:
 
-```{r example}
-## basic example code
+```{r portfolios}
+# Create several minimum-variance portfolios
+
+# no restrictions on asset allocation - shorting and leverage allowed
+minvport(.09, stalebrink$ersd, stalebrink$cormat)$portfolio
+
+# shorting and leverage NOT allowed:
+minvport(.09, stalebrink$ersd, stalebrink$cormat, 0, 1)$portfolio
+
+# shorting and leverage NOT allowed, 40% upper bound on real estate:
+minvport(.09, stalebrink$ersd, stalebrink$cormat, 0, c(1, 1, 1, .4, 1, 1))$portfolio
+
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
 
 You can also embed plots, for example:
 
@@ -73,4 +92,4 @@ You can also embed plots, for example:
 plot(pressure)
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+

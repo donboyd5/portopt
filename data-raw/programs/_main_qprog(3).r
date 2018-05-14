@@ -2,12 +2,13 @@
 # 5/12/2018
 
 usethis::use_build_ignore(c("data-raw"))
+usethis::use_build_ignore(c("docs"))
 
 
 #****************************************************************************************************
 #       Setup ####
 #****************************************************************************************************
-source("./libraries.r")
+source("./data-raw/programs/libraries.r")
 source("./functions_ersd.r") # expected return and standard deviation
 source("./functions_optim_portfolio.r")
 
@@ -161,7 +162,7 @@ bind_rows(pfolio.nobounds %>% mutate(type="nobounds"),
 #****************************************************************************************************
 fn <- "CapitalMarketAssumptions(1).xlsx"
 cmas <- c("stalebrink", "rvk", "horizon10year2017")
-df <- read_excel(paste0("./data/", fn), sheet=cmas[1], skip=2)
+df <- read_excel(paste0("./data-raw/", fn), sheet=cmas[1], skip=2)
 df
 
 ersd <- df %>%
