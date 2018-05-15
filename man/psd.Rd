@@ -20,5 +20,6 @@ The portfolio standard deviation.
 Get a portfolio's standard deviation from the correlation matrix, standard deviations, and asset-allocation weights.
 }
 \examples{
+library("magrittr")
 psd(stalebrink$cormat, stalebrink$ersd$sd, c(.3, .2, .1, .15, .1, .05))
 }

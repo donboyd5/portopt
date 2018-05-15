@@ -18,5 +18,6 @@ The portfolio expected return.
 Get a portfolio's expected return from asset-class expected returns and weights.
 }
 \examples{
+library("magrittr")
 per(stalebrink$ersd$er, c(.3, .2, .1, .15, .1, .05))
 }

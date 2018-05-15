@@ -2,7 +2,7 @@
 
 
 #**************************************************************************************************************
-#     Functions for correlation and covariance matrices, and portfolio expected returns and standard deviations ####
+#     Correlation and covariance matrices, and portfolio expected returns and standard deviations ####
 #**************************************************************************************************************
 # note order of arguments: matrix first, then er or sds, then wts
 
@@ -12,6 +12,7 @@
 #' @param wts A vector of asset-allocation weights. Should sum to 1.
 #' @return The portfolio expected return.
 #' @examples
+#' library("magrittr")
 #' per(stalebrink$ersd$er, c(.3, .2, .1, .15, .1, .05))
 #' @export
 per <- function(ervec, wts){
@@ -23,6 +24,7 @@ per <- function(ervec, wts){
   return(per)
 }
 
+
 #' Get a portfolio's standard deviation from the correlation matrix, standard deviations, and asset-allocation weights.
 #'
 #' @param cormat A correlation matrix for asset class returns.
@@ -30,6 +32,7 @@ per <- function(ervec, wts){
 #' @param wts A vector of asset-allocation weights. Should sum to 1.
 #' @return The portfolio standard deviation.
 #' @examples
+#' library("magrittr")
 #' psd(stalebrink$cormat, stalebrink$ersd$sd, c(.3, .2, .1, .15, .1, .05))
 #' @export
 psd <- function(cormat, sdvec, wts){
@@ -58,6 +61,62 @@ covmat <- function(cormat, sdvec){
 }
 
 
+#**************************************************************************************************************
+#     Diagnostic and correction tools ####
+#**************************************************************************************************************
 
+# Covariance and correlation matrix must be positive definite or else a variance can be negative
+# Note that "A correlation matrix is a symmetric positive semidefinite matrix with unit diagonal" per
+# Higham 2001 (http://eprints.ma.man.ac.uk/232/01/covered/MIMS_ep2006_70.pdf).
+
+#' Check whether covariance or correlation matrix is positive definite.
+#'
+#' A covariance matrix should be positive definite or else a variance can be negative. See, for example,
+#'   https://epublications.bond.edu.au/cgi/viewcontent.cgi?article=1078&context=ejsie
+#'
+#' There are a variety of available fixes if it is not.
+#'
+#' @param covmat A covariance matrix for asset class returns.
+#' @return TRUE if covariance matrix is positive definite, FALSE if not.
+#' @examples
+#' is.PD(covmat(stalebrink$cormat, stalebrink$ersd$sd)) # this IS positive definite
+#' is.PD(stalebrink$cormat)
+#'
+#' is.PD(covmat(rvk$cormat, rvk$ersd$sd)) # NOT PD
+#' is.PD(rvk$cormat)
+#'
+#' is.PD(covmat(horizon10year2017$cormat, horizon10year2017$ersd$sd)) # IS PD
+#' is.PD(horizon10year2017$cormat)
+#' @export
+is.PD <- function(covmat){
+  # if symmetric PD, then all eigen values are positive
+  isnotPD <- any(eigen(covmat)$values <= 0) # if true, covmat is NOT PSD
+  isPD <- !isnotPD
+  return(isPD)
+}
+
+
+#' Get the nearest positive definite correlation matrix to the matrix we have.
+#'
+#' @param cormat A covariance matrix for asset class returns.
+#' @return cormat if covariance matrix is positive definite, FALSE if not.
+#' @examples
+#' library("magrittr")
+#'
+#' is.PD(rvk$cormat)
+#' cormat2 <- makePDcorr(rvk$cormat)
+#' is.PD(cormat2)
+#'
+#' # compare:
+#' rvk$cormat %>% round(., 2)
+#' cormat2 %>% round(., 2)
+#' (cormat2 - rvk$cormat) %>% round(., 2)
+#'
+#' @export
+makePDcorr <- function(cormat){
+  # require("Matrix")
+  cormat.adj <- Matrix::nearPD(cormat, corr=TRUE)$mat
+  return(cormat.adj)
+}
 
 

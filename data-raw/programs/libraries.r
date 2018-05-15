@@ -30,10 +30,9 @@ library("apitools")
 
 # Note that nearPD in package Matrix will calculate a nearest positive definite matrix
 # https://stat.ethz.ch/R-manual/R-devel/library/Matrix/html/nearPD.html
-# It implements the algorithm of 
+# It implements the algorithm of
 # Higham, Nick (2002) Computing the nearest correlation matrix - a problem from finance;
 # IMA Journal of Numerical Analysis 22, 329–343.
 
 library("Matrix")
-
 library("quadprog")

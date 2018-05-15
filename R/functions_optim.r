@@ -11,6 +11,10 @@
 #' @param aa.ub Asset allocation upper bounds
 #' @return The portfolio expected return.
 #' @examples
+#' library("magrittr")
+#' library("quadprog")
+#' library("tidyverse")
+#'
 #' # no restrictions on asset allocation - shorting and leverage allowed
 #' minvport(.09, stalebrink$ersd, stalebrink$cormat)$portfolio
 #'
@@ -36,9 +40,10 @@ minvport <- function(er.target, ersd, cormat, aa.lb=-1e9, aa.ub=1e9) {
 
   # TODO: Add error checking.
 
-  require("quadprog")
-  require("magrittr")
-  require("tidyverse")
+  # require("quadprog")
+  # require("magrittr")
+  # require("tidyverse")
+  requireNamespace("tidyverse", quietly = TRUE)
 
   # preliminaries
   nassets <- nrow(ersd)
@@ -71,7 +76,7 @@ minvport <- function(er.target, ersd, cormat, aa.lb=-1e9, aa.ub=1e9) {
   # rbind(Amat, bvec)
 
   # done with setup, solve the problem
-  qp <- solve.QP(Dmat=2*covmat, dvec=rep(0, nassets), Amat=Amat, bvec=bvec, meq=length(b.equality))
+  qp <- quadprog::solve.QP(Dmat=2*covmat, dvec=rep(0, nassets), Amat=Amat, bvec=bvec, meq=length(b.equality))
   port <- list()
   port$er.target <- er.target
   port$er.port <- per(ersd$er, qp$solution)

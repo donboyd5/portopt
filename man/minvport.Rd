@@ -24,6 +24,10 @@ The portfolio expected return.
 Get the minimum-variance portfolio for a target expected return.
 }
 \examples{
+library("magrittr")
+library("quadprog")
+library("tidyverse")
+
 # no restrictions on asset allocation - shorting and leverage allowed
 minvport(.09, stalebrink$ersd, stalebrink$cormat)$portfolio
 

@@ -24,20 +24,24 @@ Tools for simple portfolio optimization:
 
 `portopt` cannot handle nonlinear constraints on asset allocations, and it cannot find an optimal portfolio that satisfies more-complex objectives, such as value-at-risk criteria. For my purposes, so far, these are not necessary. `portopt` uses `solve.QP` from the package `quadprog` for minimum-variance optimization. Other solvers would be required for more-complex optimization.
 
-I wrote `portopt` because I was looking for basic portfolio optimization tools in `R`. There are many available packages, but the package that looked like it would be most useful, `PortfolioAnalytics`, recently was removed from `CRAN`. At some point I may trade up to one of the more-sophisticated portfolio optimization packages available on `CRAN`.
+I wrote `portopt` because I was looking for basic portfolio optimization tools in `R`. There are many available packages, but the package that looked like it would be most useful, `PortfolioAnalytics`, recently was removed from `CRAN` although I have installed it from github. It seems very powerfu. At some point I may use it, or `fPortfolio`, instead of this.
 
 ## portopt data sets
 
-The package includes several data sets with expected returns, standard deviations, and a correlation matrix for multiple asset classes. These data sets are used in the examples below. Each data set is a list with two elements:
+`portopt` includes several data sets, each with expected returns, standard deviations, and a correlation matrix for multiple asset classes. These data sets are used in the examples below. Each data set is a list with two elements:
 
 * `ersd` - a data frame with columns class (the asset class), er (expected return), and sd (standard deviation)
 * `cormat` - a correlation matrix for these assets. Thus, the number of rows and number of columns equal the number of asset classes. The row names and column names are the asset-class names.
 
-The data sets are:
+The data sets and their respective sources are:
 
-* `stalebrink`
-* `rvk`
-* `horizon10year2017`
+* `stalebrink` -- Stalebrink, O. J. “Public Pension Funds and Assumed Rates of Return: An Empirical Examination of Public Sector Defined Benefit Pension Plans.” The American Review of Public Administration 44, no. 1 (January 1, 2014): 92–111. https://doi.org/10.1177/0275074012458826.
+
+* `rvk` -- RVK. “Asset/Liability Study: Los Angeles Fire and Police Pension System.” RVK, Inc., October 2015.
+
+* `horizon10year2017` -- “Survey of Capital Market Assumptions: 2017 Edition.” Horizon Actuarial Services, LLC, August 2017. http://www.horizonactuarial.com/uploads/3/0/4/9/30499196/horizon_cma_survey_2017_v0822.pdf.
+
+The associated documents are in the "docs" folder of this project, on the github site
 
 The examples below use these datasets.
 
@@ -53,15 +57,16 @@ devtools::install_github("donboyd5/portopt")
 ## Examples
 
 ### Get basic information about a dataset
-This is a basic example which shows you how to solve a common problem:
 
-```{r basic}
+```{r basic, warning=FALSE, message=FALSE}
 library("portopt")
 library("magrittr")
+library("Matrix")
+library("quadprog")
 library("tidyverse")
 
 stalebrink
-aa.wts <- c(.3, .2, .1, .15, .1, .05) # asset-allocation weights
+aa.wts <- c(.25, .25, .1, .15, .1, .05) # asset-allocation weights
 per(stalebrink$ersd$er, aa.wts) # portfolio expected return with these weights
 psd(stalebrink$cormat, stalebrink$ersd$sd, aa.wts) # portfolio standard deviation with these weights
 
@@ -69,7 +74,6 @@ psd(stalebrink$cormat, stalebrink$ersd$sd, aa.wts) # portfolio standard deviatio
 
 
 ### Get the minimum variance portfolio for a given expected return
-This is a basic example which shows you how to solve a common problem:
 
 ```{r portfolios}
 # Create several minimum-variance portfolios
@@ -86,9 +90,28 @@ minvport(.09, stalebrink$ersd, stalebrink$cormat, 0, c(1, 1, 1, .4, 1, 1))$portf
 ```
 
 
-You can also embed plots, for example:
+### Check whether correlation matrix is positive definite
+While it can be fixed, the differences between the original and adjusted correlation matrices can be large.
+This requires investigation.
+```{r check}
+is.PD(stalebrink$cormat) # good
 
-```{r pressure, echo = FALSE}
+is.PD(rvk$cormat) # bad
+cormat2 <- makePDcorr(rvk$cormat)
+is.PD(cormat2)
+# compare:
+rvk$cormat %>% round(., 2)
+cormat2 %>% round(., 2)
+(cormat2 - rvk$cormat) %>% round(., 2)
+
+```
+
+
+
+
+### Get and graph the efficient frontier
+
+```{r efrontier, echo = FALSE}
 plot(pressure)
 ```
 
