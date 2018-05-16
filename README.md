@@ -246,11 +246,14 @@ cormat2 %>% round(., 2)
 #> cash                         0.21 -0.12  0.03       -0.12  0.00
 ```
 
-### Get and graph the efficient frontier
+### Get and graph the efficient frontier for Stalebrink assumptions
 
 ``` r
-ef.nobound <- efrontier(seq(.00, .20, .0025), stalebrink$ersd, stalebrink$cormat)
-ef.noshort <- efrontier(seq(.00, .20, .0025), stalebrink$ersd, stalebrink$cormat, 0, 1)
+
+ds <- stalebrink
+
+ef.nobound <- efrontier(seq(.00, .30, .0025), ds$ersd, ds$cormat)
+ef.noshort <- efrontier(seq(.00, .30, .0025), ds$ersd, ds$cormat, 0, 1)
 
 # create a data frame with just the data we want
 efdf <- bind_rows(ef.nobound$efrontier %>% mutate(rule="no bounds on allocation"),
@@ -259,12 +262,46 @@ efdf <- bind_rows(ef.nobound$efrontier %>% mutate(rule="no bounds on allocation"
 
 ggplot() +
   geom_line(data=efdf, aes(psd, per, colour=rule)) +
-  scale_x_continuous(name="Standard deviation", breaks=seq(0, .3, .025), labels = scales::percent) +
-  scale_y_continuous(name="Expected return", breaks=seq(0, .2, .01), labels = scales::percent) +
+  scale_x_continuous(name="Standard deviation", breaks=seq(0, .5, .025), limits=c(0, .27), labels = scales::percent) +
+  scale_y_continuous(name="Expected return", breaks=seq(0, .5, .01), limits=c(0, .16), labels = scales::percent) +
   ggtitle("Efficient frontier for the Stalebrink capital market assumptions", subtitle="With and without bounds on asset allocations") +
   # now add the asset-class points
   geom_point(data=ef.nobound$ersd, aes(x=sd, y=er)) +
-  geom_text(data=ef.nobound$ersd, aes(x=sd, y=er, label=class), nudge_y = +.003)
+  geom_text(data=ef.nobound$ersd, aes(x=sd, y=er, label=class), nudge_y = +.003) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = .075, linetype="dashed")
+#> Warning: Removed 56 rows containing missing values (geom_path).
 ```
 
 <img src="man/figures/README-efrontier-1.png" width="100%" />
+
+### Repeat for the Horizon 2017 10-year assumptions
+
+``` r
+
+ds <- horizon10year2017
+
+ef.nobound <- efrontier(seq(.00, .30, .0025), ds$ersd, ds$cormat)
+ef.noshort <- efrontier(seq(.00, .30, .0025), ds$ersd, ds$cormat, 0, 1)
+
+# create a data frame with just the data we want
+efdf <- bind_rows(ef.nobound$efrontier %>% mutate(rule="no bounds on allocation"),
+                  ef.noshort$efrontier %>% mutate(rule="no shorts or leverage")) %>%
+  filter(type=="high", !is.na(per))
+
+ggplot() +
+  geom_line(data=efdf, aes(psd, per, colour=rule)) +
+  scale_x_continuous(name="Standard deviation", breaks=seq(0, .5, .025), limits=c(0, .27), labels = scales::percent) +
+  scale_y_continuous(name="Expected return", breaks=seq(0, .5, .01), limits=c(0, .16), labels = scales::percent) +
+  ggtitle("Efficient frontier for the Horizon 2017 average 10-year capital market assumptions", subtitle="With and without bounds on asset allocations") +
+  # now add the asset-class points
+  geom_point(data=ef.nobound$ersd, aes(x=sd, y=er)) +
+  geom_text(data=ef.nobound$ersd, aes(x=sd, y=er, label=class), nudge_y = +.003) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = .075, linetype="dashed")
+#> Warning: Removed 57 rows containing missing values (geom_path).
+```
+
+<img src="man/figures/README-unnamed-chunk-1-1.png" width="100%" />
