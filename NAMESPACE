@@ -2,6 +2,7 @@
 
 export("%>%")
 export(covmat)
+export(efrontier)
 export(is.PD)
 export(makePDcorr)
 export(minvport)
@@ -9,3 +10,4 @@ export(per)
 export(psd)
 import(tidyverse)
 importFrom(magrittr,"%>%")
+importFrom(plyr,llply)

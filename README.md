@@ -1,42 +1,69 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-portopt
-=======
+
+# portopt
 
 Tools for simple portfolio optimization:
 
--   Minimum variance portfolio for a given expected return, with no limits on allocations for individual asset classes other than that they must sum to 1. (That is, shorting and leverage are allowed.)
+  - Minimum variance portfolio for a given expected return, with no
+    limits on allocations for individual asset classes other than that
+    they must sum to 1. (That is, shorting and leverage are allowed.)
 
--   Minimum variance portfolio with lower and upper bounds on allocations for asset classes. It can also accommodate more-general linear constraints on asset classes. (For example, stocks plus bonds combined must be between 40% and 60% of the portfolio.)
+  - Minimum variance portfolio with lower and upper bounds on
+    allocations for asset classes. It can also accommodate more-general
+    linear constraints on asset classes. (For example, stocks plus bonds
+    combined must be between 40% and 60% of the portfolio.)
 
--   Efficient frontier
+  - Efficient frontier
 
-`portopt` cannot handle nonlinear constraints on asset allocations, and it cannot find an optimal portfolio that satisfies more-complex objectives, such as value-at-risk criteria. For my purposes, so far, these are not necessary. `portopt` uses `solve.QP` from the package `quadprog` for minimum-variance optimization. Other solvers would be required for more-complex optimization.
+`portopt` cannot handle nonlinear constraints on asset allocations, and
+it cannot find an optimal portfolio that satisfies more-complex
+objectives, such as value-at-risk criteria. For my purposes, so far,
+these are not necessary. `portopt` uses `solve.QP` from the package
+`quadprog` for minimum-variance optimization. Other solvers would be
+required for more-complex optimization.
 
-I wrote `portopt` because I was looking for basic portfolio optimization tools in `R`. There are many available packages, but the package that looked like it would be most useful, `PortfolioAnalytics`, recently was removed from `CRAN` although I have installed it from github. It seems very powerfu. At some point I may use it, or `fPortfolio`, instead of this.
+I wrote `portopt` because I was looking for basic portfolio optimization
+tools in `R`. There are many available packages, but the package that
+looked like it would be most useful, `PortfolioAnalytics`, recently was
+removed from `CRAN` although I have installed it from github. It seems
+very powerfu. At some point I may use it, or `fPortfolio`, instead of
+this.
 
-portopt data sets
------------------
+## portopt data sets
 
-`portopt` includes several data sets, each with expected returns, standard deviations, and a correlation matrix for multiple asset classes. These data sets are used in the examples below. Each data set is a list with two elements:
+`portopt` includes several data sets, each with expected returns,
+standard deviations, and a correlation matrix for multiple asset
+classes. These data sets are used in the examples below. Each data set
+is a list with two elements:
 
--   `ersd` - a data frame with columns class (the asset class), er (expected return), and sd (standard deviation)
--   `cormat` - a correlation matrix for these assets. Thus, the number of rows and number of columns equal the number of asset classes. The row names and column names are the asset-class names.
+  - `ersd` - a data frame with columns class (the asset class), er
+    (expected return), and sd (standard deviation)
+  - `cormat` - a correlation matrix for these assets. Thus, the number
+    of rows and number of columns equal the number of asset classes. The
+    row names and column names are the asset-class names.
 
 The data sets and their respective sources are:
 
--   `stalebrink` -- Stalebrink, O. J. “Public Pension Funds and Assumed Rates of Return: An Empirical Examination of Public Sector Defined Benefit Pension Plans.” The American Review of Public Administration 44, no. 1 (January 1, 2014): 92–111. <https://doi.org/10.1177/0275074012458826>.
+  - `stalebrink` – Stalebrink, O. J. “Public Pension Funds and Assumed
+    Rates of Return: An Empirical Examination of Public Sector Defined
+    Benefit Pension Plans.” The American Review of Public Administration
+    44, no. 1 (January 1, 2014): 92–111.
+    <https://doi.org/10.1177/0275074012458826>.
 
--   `rvk` -- RVK. “Asset/Liability Study: Los Angeles Fire and Police Pension System.” RVK, Inc., October 2015.
+  - `rvk` – RVK. “Asset/Liability Study: Los Angeles Fire and Police
+    Pension System.” RVK, Inc., October 2015.
 
--   `horizon10year2017` -- “Survey of Capital Market Assumptions: 2017 Edition.” Horizon Actuarial Services, LLC, August 2017. <http://www.horizonactuarial.com/uploads/3/0/4/9/30499196/horizon_cma_survey_2017_v0822.pdf>.
+  - `horizon10year2017` – “Survey of Capital Market Assumptions: 2017
+    Edition.” Horizon Actuarial Services, LLC, August 2017.
+    <http://www.horizonactuarial.com/uploads/3/0/4/9/30499196/horizon_cma_survey_2017_v0822.pdf>.
 
-The associated documents are in the "docs" folder of this project, on the github site
+The associated documents are in the “docs” folder of this project, on
+the github site
 
 The examples below use these datasets.
 
-Installation
-------------
+## Installation
 
 Install as follows:
 
@@ -44,8 +71,7 @@ Install as follows:
 devtools::install_github("donboyd5/portopt")
 ```
 
-Examples
---------
+## Examples
 
 ### Get basic information about a dataset
 
@@ -127,7 +153,8 @@ minvport(.09, stalebrink$ersd, stalebrink$cormat, 0, c(1, 1, 1, .4, 1, 1))$portf
 
 ### Check whether correlation matrix is positive definite
 
-While it can be fixed, the differences between the original and adjusted correlation matrices can be large. This requires investigation.
+While it can be fixed, the differences between the original and adjusted
+correlation matrices can be large. This requires investigation.
 
 ``` r
 is.PD(stalebrink$cormat) # good

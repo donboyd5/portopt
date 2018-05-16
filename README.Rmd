@@ -112,7 +112,22 @@ cormat2 %>% round(., 2)
 ### Get and graph the efficient frontier
 
 ```{r efrontier, echo = FALSE}
-plot(pressure)
+ef.nobound <- efrontier(seq(.00, .20, .0025), stalebrink$ersd, stalebrink$cormat)
+ef.noshort <- efrontier(seq(.00, .20, .0025), stalebrink$ersd, stalebrink$cormat, 0, 1)
+
+# create a data frame with just the data we want
+efdf <- bind_rows(ef.nobound$efrontier %>% mutate(rule="no bounds on allocation"),
+                  ef.noshort$efrontier %>% mutate(rule="no shorts or leverage")) %>%
+  filter(type=="high", !is.na(per))
+
+ggplot() +
+  geom_line(data=efdf, aes(psd, per, colour=rule)) +
+  scale_x_continuous(name="Standard deviation", breaks=seq(0, .3, .025), labels = scales::percent) +
+  scale_y_continuous(name="Expected return", breaks=seq(0, .2, .01), labels = scales::percent) +
+  ggtitle("Efficient frontier for the Stalebrink capital market assumptions", subtitle="With and without bounds on asset allocations") +
+  # now add the asset-class points
+  geom_point(data=ef.nobound$ersd, aes(x=sd, y=er)) +
+  geom_text(data=ef.nobound$ersd, aes(x=sd, y=er, label=class), nudge_y = +.003)
 ```
 
 

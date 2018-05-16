@@ -1,7 +1,7 @@
 Package: portopt
 Type: Package
 Title: Basic Portfolio Optimization Tools
-Version: 0.1.0
+Version: 0.1.2
 Author: Don Boyd
 Maintainer: Don Boyd <donboyd5@gmail.com>
 Description: Allows minimum-variance portfolio optimization with simple linear constraints on asset allocations.
@@ -12,8 +12,10 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Imports:
+    plyr,
     magrittr,
     Matrix,
     quadprog,
-    tidyverse
+    tidyverse,
+    scales
 RoxygenNote: 6.0.1

@@ -75,33 +75,41 @@ minvport <- function(er.target, ersd, cormat, aa.lb=-1e9, aa.ub=1e9) {
   # ncol(Amat) == length(bvec)
   # rbind(Amat, bvec)
 
-  # done with setup, solve the problem
-  qp <- quadprog::solve.QP(Dmat=2*covmat, dvec=rep(0, nassets), Amat=Amat, bvec=bvec, meq=length(b.equality))
+  # initialize the list to return from the function
   port <- list()
+  # we can always return the first two items below
   port$er.target <- er.target
-  port$er.port <- per(ersd$er, qp$solution)
-  port$sd.port <- psd(cormat, ersd$sd, qp$solution)
-  port$portfolio <- ersd %>% mutate(asset.weight=qp$solution, per=port$er.port, psd=port$sd.port)
   port$cormat <- cormat
-  port$qp <- qp
+
+  # done with setup, solve the problem, with simple error handling
+  qp <- try(quadprog::solve.QP(Dmat=2*covmat, dvec=rep(0, nassets), Amat=Amat, bvec=bvec, meq=length(b.equality)),
+            silent=TRUE)
+
+  if(!is.list(qp)){ # if not a list, we have an error
+    port$msg <- qp[1]
+    port$er.port <- NA
+    port$sd.port <- NA
+    port$portfolio <- ersd %>% mutate(asset.weight=NA, per=NA, psd=NA)
+
+  } else{
+    port$msg <- "success"
+    port$er.port <- per(ersd$er, qp$solution)
+    port$sd.port <- psd(cormat, ersd$sd, qp$solution)
+    port$portfolio <- ersd %>% mutate(asset.weight=qp$solution, per=port$er.port, psd=port$sd.port)
+    port$qp <- qp
+  }
+
   return(port)
 }
 
 
-# # TODO: Fix the arguments. Not sure we'll ever need this, though
-# minvport_nobounds <- function(target, port){
-#   # UNBOUNDED
-#   # efficient portfolio weights, no bounds on asset weights
-#   # takes a target return and a portfolio object (list) that has elements names, er, and covmat
-#   # Based on Zivot
-#   # http://faculty.washington.edu/ezivot/econ424/portfolioTheoryMatrix.pdf
-#   ones <- rep(1, length(port$ersd$er))
-#   top <- cbind(2 * port$covmat, port$ersd$er, ones)
-#   bot <- cbind(rbind(port$ersd$er, ones), matrix(0, 2, 2))
-#   A <- rbind(top, bot)
-#   b.target <- as.matrix(c(rep(0, nrow(port$ersd)), target, 1))
-#   x <- solve(A, b.target)
-#   wts <- x[1:nrow(port$ersd)]
-#   names(wts) <- port$names
-#   return(wts)
-# }
+# er.target <- .03
+# ersd <- stalebrink$ersd
+# cormat <- stalebrink$cormat
+# aa.lb <- 0
+# aa.ub <- 1
+
+# minvport(.06, stalebrink$ersd, stalebrink$cormat, aa.lb=0, aa.ub=1)
+# minvport(.03, stalebrink$ersd, stalebrink$cormat, aa.lb=0, aa.ub=1)
+
+

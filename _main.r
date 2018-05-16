@@ -14,7 +14,8 @@ use_description()
 usethis::use_build_ignore(c("data-raw"))
 usethis::use_build_ignore(c("docs"))
 
-usethis::use_package("tidyverse") # puts it in Imports
+usethis::use_package("tidyverse") # puts it in Imports of DESCRIPTION
+usethis::use_package("scales")
 usethis::use_package("Matrix")
 usethis::use_package("quadprog")
 
