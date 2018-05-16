@@ -24,7 +24,7 @@ Tools for simple portfolio optimization:
 
 `portopt` cannot handle nonlinear constraints on asset allocations, and it cannot find an optimal portfolio that satisfies more-complex objectives, such as value-at-risk criteria. For my purposes, so far, these are not necessary. `portopt` uses `solve.QP` from the package `quadprog` for minimum-variance optimization. Other solvers would be required for more-complex optimization.
 
-I wrote `portopt` because I was looking for basic portfolio optimization tools in `R`. There are many available packages, but the package that looked like it would be most useful, `PortfolioAnalytics`, recently was removed from `CRAN` although I have installed it from github. It seems very powerfu. At some point I may use it, or `fPortfolio`, instead of this.
+I wrote `portopt` because I was looking for basic portfolio optimization tools in `R`. There are many available packages, but the package that looked like it would be most useful, `PortfolioAnalytics`, recently was removed from `CRAN` although I have installed it from github. It seems very powerful. `fPortfolio` also seems powerful. I understand the basics of how to use them when we are starting with raw data - historical data on asset returns - but I haven't figured out how to use them when we only want to use summary measures to construct an efficient frontier, by using already-available expected returns and standard deviations by asset classs, plus the correlation matrix. I am sure `PortfolioAnalytics` and `fPortfolio` can do that but I haven't figured it out. At some point I may abandon this package in favor of one of these two packages.
 
 ## portopt data sets
 
@@ -111,7 +111,7 @@ cormat2 %>% round(., 2)
 
 ### Get and graph the efficient frontier
 
-```{r efrontier, echo = FALSE}
+```{r efrontier}
 ef.nobound <- efrontier(seq(.00, .20, .0025), stalebrink$ersd, stalebrink$cormat)
 ef.noshort <- efrontier(seq(.00, .20, .0025), stalebrink$ersd, stalebrink$cormat, 0, 1)
 
