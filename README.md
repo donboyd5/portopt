@@ -110,11 +110,11 @@ stalebrink
 #> re           0.05     -0.28      -0.37  1.00 -0.06  0.33
 #> alts         0.13     -0.04      -0.04 -0.06  1.00 -0.10
 #> cash        -0.08      0.29       0.22  0.33 -0.10  1.00
-aa.wts <- c(.25, .25, .1, .15, .1, .05) # asset-allocation weights
+aa.wts <- c(.25, .25, .2, .15, .1, .05) # asset-allocation weights
 per(stalebrink$ersd$er, aa.wts) # portfolio expected return with these weights
-#> [1] 0.09123333
+#> [1] 0.08788
 psd(stalebrink$cormat, stalebrink$ersd$sd, aa.wts) # portfolio standard deviation with these weights
-#> [1] 0.07944327
+#> [1] 0.07708479
 ```
 
 ### Get the minimum variance portfolio for a given expected return

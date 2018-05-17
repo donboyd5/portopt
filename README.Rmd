@@ -67,7 +67,7 @@ library("quadprog")
 library("tidyverse")
 
 stalebrink
-aa.wts <- c(.25, .25, .1, .15, .1, .05) # asset-allocation weights
+aa.wts <- c(.25, .25, .2, .15, .1, .05) # asset-allocation weights
 per(stalebrink$ersd$er, aa.wts) # portfolio expected return with these weights
 psd(stalebrink$cormat, stalebrink$ersd$sd, aa.wts) # portfolio standard deviation with these weights
 
