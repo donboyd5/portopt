@@ -13,7 +13,7 @@
 #' @return The portfolio expected return.
 #' @examples
 #' library("magrittr")
-#' per(stalebrink$ersd$er, c(.3, .2, .1, .15, .1, .05))
+#' per(stalebrink$ersd$er, c(.25, .25, .2, .15, .1, .05))
 #' @export
 per <- function(ervec, wts){
   # portfolio expected return
@@ -33,7 +33,7 @@ per <- function(ervec, wts){
 #' @return The portfolio standard deviation.
 #' @examples
 #' library("magrittr")
-#' psd(stalebrink$cormat, stalebrink$ersd$sd, c(.3, .2, .1, .15, .1, .05))
+#' psd(stalebrink$cormat, stalebrink$ersd$sd, c(.25, .25, .2, .15, .1, .05))
 #' @export
 psd <- function(cormat, sdvec, wts){
   wts <- wts / sum(wts) # force-fit wts, no error checking
