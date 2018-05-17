@@ -3,7 +3,7 @@
 export("%>%")
 export(covmat)
 export(efrontier)
-export(is.PD)
+export(is.PSD)
 export(makePDcorr)
 export(minvport)
 export(per)

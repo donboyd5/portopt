@@ -159,19 +159,31 @@ minvport(.09, stalebrink$ersd, stalebrink$cormat, 0, c(1, 1, 1, .4, 1, 1))$portf
 #> 6 cash       0.0377 0.0308      0.09       0       0.09 0.0437
 ```
 
-### Check whether correlation matrix is positive definite
+### Check whether correlation matrix is positive semi-definite
 
-While it can be fixed, the differences between the original and adjusted
-correlation matrices can be large. This requires investigation.
+A correlation matrix must be positive semi-definite but sometimes
+matrices estimated from sample data are not, especially if the
+correlations are pairwise and do not all have the same number of
+observations. This could result in a negative variance, which is not
+allowed.
+
+We can adjust an intended correlation matrix that is not proper (not
+positive semi-definite) to get the nearest proper matrix, using
+makePDcorr (which uses the function nearPD from the package Matrix).
+However, in the example below, the differences between the original rvk
+correlation matrix and the adjusted matrix appear quite large, which is
+disconcerting.
+
+This requires investigation when time allows.
 
 ``` r
-is.PD(stalebrink$cormat) # good
+is.PSD(stalebrink$cormat) # good
 #> [1] TRUE
 
-is.PD(rvk$cormat) # bad
+is.PSD(rvk$cormat) # bad
 #> [1] FALSE
 cormat2 <- makePDcorr(rvk$cormat)
-is.PD(cormat2)
+is.PSD(cormat2)
 #> [1] TRUE
 # compare:
 rvk$cormat %>% round(., 2)

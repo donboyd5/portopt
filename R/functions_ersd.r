@@ -65,47 +65,66 @@ covmat <- function(cormat, sdvec){
 #     Diagnostic and correction tools ####
 #**************************************************************************************************************
 
-# Covariance and correlation matrix must be positive definite or else a variance can be negative
+# Covariance and correlation matrix must be positive semi-definite or else a variance can be negative
 # Note that "A correlation matrix is a symmetric positive semidefinite matrix with unit diagonal" per
 # Higham 2001 (http://eprints.ma.man.ac.uk/232/01/covered/MIMS_ep2006_70.pdf).
 
-#' Check whether covariance or correlation matrix is positive definite.
+#' Check whether covariance or correlation matrix is positive semi-definite.
 #'
-#' A covariance matrix should be positive definite or else a variance can be negative. See, for example,
+#' A covariance matrix should be positive semi-definite or else a variance can be negative. See, for example:
 #'   https://epublications.bond.edu.au/cgi/viewcontent.cgi?article=1078&context=ejsie
+#'   https://stats.stackexchange.com/questions/69114/why-does-correlation-matrix-need-to-be-positive-semi-definite-and-what-does-it-m
+#'   https://stats.stackexchange.com/questions/125412/is-every-correlation-matrix-positive-semi-definite
+#'   https://blogs.sas.com/content/iml/2012/09/12/when-is-a-correlation-matrix-not-a-correlation-matrix.html
 #'
-#' There are a variety of available fixes if it is not.
+#' A good discussion of the problem and possible solutions
+#' is at:
 #'
-#' @param covmat A covariance matrix for asset class returns.
-#' @return TRUE if covariance matrix is positive definite, FALSE if not.
+#'   https://nickhigham.wordpress.com/2013/02/13/the-nearest-correlation-matrix/
+#'
+#' His method is used in makePDcorr.
+#'
+#' @param cmat A correlation or covariance matrix for asset class returns.
+#' @return TRUE if matrix is positive semi-definite, FALSE if not.
 #' @examples
-#' is.PD(covmat(stalebrink$cormat, stalebrink$ersd$sd)) # this IS positive definite
-#' is.PD(stalebrink$cormat)
+#' is.PSD(covmat(stalebrink$cormat, stalebrink$ersd$sd)) # this IS positive semi-definite
+#' is.PSD(stalebrink$cormat)
 #'
-#' is.PD(covmat(rvk$cormat, rvk$ersd$sd)) # NOT PD
-#' is.PD(rvk$cormat)
+#' is.PSD(covmat(rvk$cormat, rvk$ersd$sd)) # NOT PSD
+#' is.PSD(rvk$cormat)
 #'
-#' is.PD(covmat(horizon10year2017$cormat, horizon10year2017$ersd$sd)) # IS PD
-#' is.PD(horizon10year2017$cormat)
+#' is.PSD(covmat(horizon10year2017$cormat, horizon10year2017$ersd$sd)) # IS PSD
+#' is.PSD(horizon10year2017$cormat)
 #' @export
-is.PD <- function(covmat){
-  # if symmetric PD, then all eigen values are positive
-  isnotPD <- any(eigen(covmat)$values <= 0) # if true, covmat is NOT PSD
-  isPD <- !isnotPD
-  return(isPD)
+is.PSD <- function(cmat){
+  # if symmetric PSD, then all eigen values are non-negative -- required for a correlation matrix
+  isnotPSD <- any(eigen(cmat)$values < 0) # if true, covmat is NOT PSD
+  isPSD <- !isnotPSD
+  return(isPSD)
 }
 
 
 #' Get the nearest positive definite correlation matrix to the matrix we have.
 #'
-#' @param cormat A covariance matrix for asset class returns.
-#' @return cormat if covariance matrix is positive definite, FALSE if not.
+#' Note that this insists upon returning a positive definite correlation matrix. We would be
+#' satisfied if it only returned a positive semi-definite matrix, but that does not seem
+#' to be an option.
+#'
+#' See:
+#'   Higham, Nicholas J. (2002) Computing the Nearest Correlation Matrix---A Problem from Finance. IMA Journal of Numerical Analysis, 22 (3). pp. 329-343. ISSN 0272-4979
+#'   http://eprints.ma.man.ac.uk/232/
+#'
+#'   https://www.nag.com/IndustryArticles/fixing-a-broken-correlation-matrix.pdf
+#'
+#'
+#' @param cormat A correlation matrix for asset class returns.
+#' @return cormat if correlation matrix is positive definite, FALSE if not.
 #' @examples
 #' library("magrittr")
 #'
-#' is.PD(rvk$cormat)
+#' is.PSD(rvk$cormat)
 #' cormat2 <- makePDcorr(rvk$cormat)
-#' is.PD(cormat2)
+#' is.PSD(cormat2)
 #'
 #' # compare:
 #' rvk$cormat %>% round(., 2)

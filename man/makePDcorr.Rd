@@ -7,20 +7,27 @@
 makePDcorr(cormat)
 }
 \arguments{
-\item{cormat}{A covariance matrix for asset class returns.}
+\item{cormat}{A correlation matrix for asset class returns.}
 }
 \value{
-cormat if covariance matrix is positive definite, FALSE if not.
+cormat if correlation matrix is positive definite, FALSE if not.
 }
 \description{
-Get the nearest positive definite correlation matrix to the matrix we have.
+Note that this insists upon returning a positive definite correlation matrix. We would be
+satisfied if it only returned a positive semi-definite matrix, but that does not seem
+to be an option.
+}
+\details{
+See:
+  Higham, Nicholas J. (2002) Computing the Nearest Correlation Matrix---A Problem from Finance. IMA Journal of Numerical Analysis, 22 (3). pp. 329-343. ISSN 0272-4979
+  http://eprints.ma.man.ac.uk/232/
 }
 \examples{
 library("magrittr")
 
-is.PD(rvk$cormat)
+is.PSD(rvk$cormat)
 cormat2 <- makePDcorr(rvk$cormat)
-is.PD(cormat2)
+is.PSD(cormat2)
 
 # compare:
 rvk$cormat \%>\% round(., 2)
