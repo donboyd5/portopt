@@ -84,6 +84,7 @@ devtools::install_github("donboyd5/portopt")
 
 ``` r
 library("portopt")
+library("plyr")
 library("magrittr")
 library("Matrix")
 library("quadprog")
@@ -123,39 +124,39 @@ psd(stalebrink$cormat, stalebrink$ersd$sd, aa.wts) # portfolio standard deviatio
 
 # no restrictions on asset allocation - shorting and leverage allowed
 minvport(.09, stalebrink$ersd, stalebrink$cormat)$portfolio
-#> # A tibble: 6 x 6
-#>   class          er     sd asset.weight   per    psd
-#>   <chr>       <dbl>  <dbl>        <dbl> <dbl>  <dbl>
-#> 1 stocks     0.148  0.249       0.00276  0.09 0.0356
-#> 2 bonds.dom  0.058  0.0751      0.209    0.09 0.0356
-#> 3 bonds.intl 0.0577 0.116       0.123    0.09 0.0356
-#> 4 re         0.103  0.0626      0.569    0.09 0.0356
-#> 5 alts       0.0738 0.0734      0.226    0.09 0.0356
-#> 6 cash       0.0377 0.0308     -0.130    0.09 0.0356
+#> # A tibble: 6 x 7
+#>   class          er     sd er.target asset.weight   per    psd
+#>   <chr>       <dbl>  <dbl>     <dbl>        <dbl> <dbl>  <dbl>
+#> 1 stocks     0.148  0.249       0.09      0.00276  0.09 0.0356
+#> 2 bonds.dom  0.058  0.0751      0.09      0.209    0.09 0.0356
+#> 3 bonds.intl 0.0577 0.116       0.09      0.123    0.09 0.0356
+#> 4 re         0.103  0.0626      0.09      0.569    0.09 0.0356
+#> 5 alts       0.0738 0.0734      0.09      0.226    0.09 0.0356
+#> 6 cash       0.0377 0.0308      0.09     -0.130    0.09 0.0356
 
 # shorting and leverage NOT allowed:
 minvport(.09, stalebrink$ersd, stalebrink$cormat, 0, 1)$portfolio
-#> # A tibble: 6 x 6
-#>   class          er     sd asset.weight   per    psd
-#>   <chr>       <dbl>  <dbl>        <dbl> <dbl>  <dbl>
-#> 1 stocks     0.148  0.249        0.0323  0.09 0.0374
-#> 2 bonds.dom  0.058  0.0751       0.119   0.09 0.0374
-#> 3 bonds.intl 0.0577 0.116        0.0886  0.09 0.0374
-#> 4 re         0.103  0.0626       0.585   0.09 0.0374
-#> 5 alts       0.0738 0.0734       0.175   0.09 0.0374
-#> 6 cash       0.0377 0.0308       0       0.09 0.0374
+#> # A tibble: 6 x 7
+#>   class          er     sd er.target asset.weight   per    psd
+#>   <chr>       <dbl>  <dbl>     <dbl>        <dbl> <dbl>  <dbl>
+#> 1 stocks     0.148  0.249       0.09       0.0323  0.09 0.0374
+#> 2 bonds.dom  0.058  0.0751      0.09       0.119   0.09 0.0374
+#> 3 bonds.intl 0.0577 0.116       0.09       0.0886  0.09 0.0374
+#> 4 re         0.103  0.0626      0.09       0.585   0.09 0.0374
+#> 5 alts       0.0738 0.0734      0.09       0.175   0.09 0.0374
+#> 6 cash       0.0377 0.0308      0.09       0       0.09 0.0374
 
 # shorting and leverage NOT allowed, 40% upper bound on real estate:
 minvport(.09, stalebrink$ersd, stalebrink$cormat, 0, c(1, 1, 1, .4, 1, 1))$portfolio
-#> # A tibble: 6 x 6
-#>   class          er     sd asset.weight   per    psd
-#>   <chr>       <dbl>  <dbl>        <dbl> <dbl>  <dbl>
-#> 1 stocks     0.148  0.249        0.101   0.09 0.0437
-#> 2 bonds.dom  0.058  0.0751       0.157   0.09 0.0437
-#> 3 bonds.intl 0.0577 0.116        0.0330  0.09 0.0437
-#> 4 re         0.103  0.0626       0.40    0.09 0.0437
-#> 5 alts       0.0738 0.0734       0.310   0.09 0.0437
-#> 6 cash       0.0377 0.0308       0       0.09 0.0437
+#> # A tibble: 6 x 7
+#>   class          er     sd er.target asset.weight   per    psd
+#>   <chr>       <dbl>  <dbl>     <dbl>        <dbl> <dbl>  <dbl>
+#> 1 stocks     0.148  0.249       0.09       0.101   0.09 0.0437
+#> 2 bonds.dom  0.058  0.0751      0.09       0.157   0.09 0.0437
+#> 3 bonds.intl 0.0577 0.116       0.09       0.0330  0.09 0.0437
+#> 4 re         0.103  0.0626      0.09       0.40    0.09 0.0437
+#> 5 alts       0.0738 0.0734      0.09       0.310   0.09 0.0437
+#> 6 cash       0.0377 0.0308      0.09       0       0.09 0.0437
 ```
 
 ### Check whether correlation matrix is positive definite
@@ -305,3 +306,41 @@ ggplot() +
 ```
 
 <img src="man/figures/README-unnamed-chunk-1-1.png" width="100%" />
+
+### Asset weights for the Stalebrink assumtions
+
+``` r
+ds <- stalebrink
+
+ef.nobound <- efrontier(seq(.00, .30, .0025), ds$ersd, ds$cormat)
+ef.noshort <- efrontier(seq(.00, .30, .0025), ds$ersd, ds$cormat, 0, 1)
+
+# Examine asset class weights for different classes
+ef.noshort$weights %>%
+  filter(class %in% c("stocks", "cash", "bonds.dom")) %>%
+  ggplot(aes(er.target, asset.weight, colour=class)) +
+  geom_line() +
+  ggtitle("Stalebrink weights with no shorting or leverage")
+#> Warning: Removed 231 rows containing missing values (geom_path).
+```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+``` r
+
+# Compare weights for an asset class, optimized with and without bounds
+aclass <- "stocks"
+wts <- bind_rows(ef.nobound$weights %>% mutate(rule="no bounds on allocation"),
+                 ef.noshort$weights %>% mutate(rule="no shorts or leverage")) %>%
+       filter(class==aclass)
+     
+wts %>%
+       ggplot(aes(er.target, asset.weight, colour=rule)) +
+       geom_line() +
+       geom_hline(yintercept=0) +
+       scale_x_continuous(breaks=seq(0, 1, .05)) +
+       ggtitle(paste0(aclass, " weights, Stalebrink assumptions"))
+#> Warning: Removed 77 rows containing missing values (geom_path).
+```
+
+<img src="man/figures/README-unnamed-chunk-2-2.png" width="100%" />

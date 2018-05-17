@@ -89,13 +89,13 @@ minvport <- function(er.target, ersd, cormat, aa.lb=-1e9, aa.ub=1e9) {
     port$msg <- qp[1]
     port$er.port <- NA
     port$sd.port <- NA
-    port$portfolio <- ersd %>% mutate(asset.weight=NA, per=NA, psd=NA)
+    port$portfolio <- ersd %>% mutate(er.target=NA, asset.weight=NA, per=NA, psd=NA)
 
   } else{
     port$msg <- "success"
     port$er.port <- per(ersd$er, qp$solution)
     port$sd.port <- psd(cormat, ersd$sd, qp$solution)
-    port$portfolio <- ersd %>% mutate(asset.weight=qp$solution, per=port$er.port, psd=port$sd.port)
+    port$portfolio <- ersd %>% mutate(er.target=er.target, asset.weight=qp$solution, per=port$er.port, psd=port$sd.port)
     port$qp <- qp
   }
 

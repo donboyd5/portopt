@@ -60,6 +60,7 @@ devtools::install_github("donboyd5/portopt")
 
 ```{r basic, warning=FALSE, message=FALSE}
 library("portopt")
+library("plyr")
 library("magrittr")
 library("Matrix")
 library("quadprog")
@@ -164,5 +165,36 @@ ggplot() +
   geom_hline(yintercept = .075, linetype="dashed")
 
 ```
+
+
+### Asset weights for the Stalebrink assumtions
+```{r}
+ds <- stalebrink
+
+ef.nobound <- efrontier(seq(.00, .30, .0025), ds$ersd, ds$cormat)
+ef.noshort <- efrontier(seq(.00, .30, .0025), ds$ersd, ds$cormat, 0, 1)
+
+# Examine asset class weights for different classes
+ef.noshort$weights %>%
+  filter(class %in% c("stocks", "cash", "bonds.dom")) %>%
+  ggplot(aes(er.target, asset.weight, colour=class)) +
+  geom_line() +
+  ggtitle("Stalebrink weights with no shorting or leverage")
+
+# Compare weights for an asset class, optimized with and without bounds
+aclass <- "stocks"
+wts <- bind_rows(ef.nobound$weights %>% mutate(rule="no bounds on allocation"),
+                 ef.noshort$weights %>% mutate(rule="no shorts or leverage")) %>%
+       filter(class==aclass)
+     
+wts %>%
+       ggplot(aes(er.target, asset.weight, colour=rule)) +
+       geom_line() +
+       geom_hline(yintercept=0) +
+       scale_x_continuous(breaks=seq(0, 1, .05)) +
+       ggtitle(paste0(aclass, " weights, Stalebrink assumptions"))
+
+```
+
 
 

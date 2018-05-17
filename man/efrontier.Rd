@@ -35,7 +35,7 @@ ef.noshort <- efrontier(seq(.00, .20, .0025), stalebrink$ersd, stalebrink$cormat
 # create a data frame with just the data we want
 efdf <- bind_rows(ef.nobound$efrontier \%>\% mutate(rule="no bounds on allocation"),
                   ef.noshort$efrontier \%>\% mutate(rule="no shorts or leverage")) \%>\%
-                    filter(type=="high", !is.na(per))
+        filter(type=="high", !is.na(per))
 
 # graph the unbounded and bounded frontiers, and the asset-class assumptions
 ggplot() +
@@ -46,5 +46,23 @@ ggplot() +
     # now add the asset-class points
     geom_point(data=ef.nobound$ersd, aes(x=sd, y=er)) +
     geom_text(data=ef.nobound$ersd, aes(x=sd, y=er, label=class), nudge_y = +.003)
+
+# Examine asset class weights for different classes
+ef.noshort$weights \%>\%
+filter(class \%in\% c("stocks", "cash", "bonds.dom")) \%>\%
+  ggplot(aes(er.target, asset.weight, colour=class)) +
+    geom_line()
+
+# Compare weights for an asset class, optimized with and without bounds
+aclass <- "stocks"
+wts <- bind_rows(ef.nobound$weights \%>\% mutate(rule="no bounds on allocation"),
+                ef.noshort$weights \%>\% mutate(rule="no shorts or leverage")) \%>\%
+      filter(class==aclass)
+
+wts \%>\%
+      ggplot(aes(er.target, asset.weight, colour=rule)) +
+      geom_line() +
+      geom_hline(yintercept=0) +
+      ggtitle(paste0(aclass, " weights"))
 
 }

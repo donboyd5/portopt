@@ -20,7 +20,7 @@
 #' # create a data frame with just the data we want
 #' efdf <- bind_rows(ef.nobound$efrontier %>% mutate(rule="no bounds on allocation"),
 #'                   ef.noshort$efrontier %>% mutate(rule="no shorts or leverage")) %>%
-#'                     filter(type=="high", !is.na(per))
+#'         filter(type=="high", !is.na(per))
 #'
 #' # graph the unbounded and bounded frontiers, and the asset-class assumptions
 #' ggplot() +
@@ -32,6 +32,24 @@
 #'     geom_point(data=ef.nobound$ersd, aes(x=sd, y=er)) +
 #'     geom_text(data=ef.nobound$ersd, aes(x=sd, y=er, label=class), nudge_y = +.003)
 #'
+#' # Examine asset class weights for different classes
+#' ef.noshort$weights %>%
+#' filter(class %in% c("stocks", "cash", "bonds.dom")) %>%
+#'   ggplot(aes(er.target, asset.weight, colour=class)) +
+#'     geom_line()
+#'
+#' # Compare weights for an asset class, optimized with and without bounds
+#' aclass <- "stocks"
+#' wts <- bind_rows(ef.nobound$weights %>% mutate(rule="no bounds on allocation"),
+#'                 ef.noshort$weights %>% mutate(rule="no shorts or leverage")) %>%
+#'       filter(class==aclass)
+#'
+#' wts %>%
+#'       ggplot(aes(er.target, asset.weight, colour=rule)) +
+#'       geom_line() +
+#'       geom_hline(yintercept=0) +
+#'       ggtitle(paste0(aclass, " weights"))
+#'
 #' @export
 efrontier <- function(er.target.vec, ersd, cormat, aa.lb=-1e9, aa.ub=1e9){
   requireNamespace("tidyverse", quietly = TRUE)
@@ -41,6 +59,9 @@ efrontier <- function(er.target.vec, ersd, cormat, aa.lb=-1e9, aa.ub=1e9){
   # retrieve vectors with portfolio expected returns (pervec) and portfolio standard deviations (psdvec)
   pervec <- llply(1:length(port), function(i) return(port[[i]]$er.port)) %>% unlist
   psdvec <- llply(1:length(port), function(i) return(port[[i]]$sd.port)) %>% unlist
+
+  # create data frame with asset weights for each class, at each target return (plus other information)
+  weights <- ldply(1:length(port), function(i) return(port[i][[1]]$portfolio))
 
   # create a data frame with er targets, calculated portfolio er and sd, and identify which are on the high part of the
   # frontier (good) and which are on the low part (bad)
@@ -60,6 +81,7 @@ efrontier <- function(er.target.vec, ersd, cormat, aa.lb=-1e9, aa.ub=1e9){
   eflist <- list()
   eflist$ersd <- ersd
   eflist$efrontier <- efrontier
+  eflist$weights <- weights
   eflist$port <- port
 
   return(eflist)

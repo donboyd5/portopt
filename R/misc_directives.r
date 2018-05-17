@@ -1,7 +1,7 @@
 
 # Misc directives
 
-#' @importFrom plyr llply
+#' @importFrom plyr llply ldply
 #' @import tidyverse
 #'
 NULL
