@@ -201,4 +201,52 @@ wts %>%
 ```
 
 
+### Compare the Stalebrink and Horizon 2017 no-shorts/no-leverage frontiers
+```{r}
+sb <- efrontier(seq(.00, .30, .0025), stalebrink$ersd, stalebrink$cormat, 0, 1)
+hzn <- efrontier(seq(.00, .30, .0025), horizon10year2017$ersd, horizon10year2017$cormat, 0, 1)
+
+# create a data frame with just the data we want
+efdf <- bind_rows(sb$efrontier %>% mutate(data="Stalebrink"),
+                  hzn$efrontier %>% mutate(data="Horizon")) %>%
+  filter(type=="high", !is.na(per))
+
+ggplot() +
+  geom_line(data=efdf, aes(psd, per, colour=data)) +
+  scale_x_continuous(name="Standard deviation", breaks=seq(0, .5, .025), limits=c(0, .27), labels = scales::percent) +
+  scale_y_continuous(name="Expected return", breaks=seq(0, .5, .01), limits=c(0, .16), labels = scales::percent) +
+  ggtitle("Efficient frontiers for the Stalebrink and Horizon 2017 average 10-year capital market assumptions",
+          subtitle="No shorting or leverage allowed") +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = .075, linetype="dashed")
+
+```
+
+
+### Stalebrink with limits on asset allocations
+```{r}
+# stalebrink$ersd$class # "stocks"     "bonds.dom"  "bonds.intl" "re"         "alts"       "cash"
+lims.lb <- c(.3, .1, .1, .1, .1, .1)
+lims.ub <- c(.8, .4, .4, .3, .3, .3)
+sb <- efrontier(seq(.00, .30, .0025), stalebrink$ersd, stalebrink$cormat, 0, 1)
+sb2 <- efrontier(seq(.00, .30, .0025), stalebrink$ersd, stalebrink$cormat, lims.lb, lims.ub)
+
+# create a data frame with just the data we want
+efdf <- bind_rows(sb$efrontier %>% mutate(data="Stalebrink"),
+                  sb2$efrontier %>% mutate(data="Stalebrink limits")) %>%
+  filter(type=="high", !is.na(per))
+
+ggplot() +
+  geom_line(data=efdf, aes(psd, per, colour=data)) +
+  scale_x_continuous(name="Standard deviation", breaks=seq(0, .5, .025), limits=c(0, .27), labels = scales::percent) +
+  scale_y_continuous(name="Expected return", breaks=seq(0, .5, .01), limits=c(0, .16), labels = scales::percent) +
+  ggtitle("Efficient frontiers for two Stalebrink rules",
+          subtitle="No shorting or leverage allowed") +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = .075, linetype="dashed")
+
+```
+
 
